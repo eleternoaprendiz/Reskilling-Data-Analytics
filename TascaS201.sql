@@ -111,10 +111,33 @@ WHERE
 -- que realizaron transacciones de un valor comprendido entre 100 y 200 euros en las siguientes
 -- fechas: 29/04/2021, 20/07/2021 y 13/03/2022, presentadas de mayor a menor cantidad.
 
-SELECT c.company_name Empresa, c.phone Teléfono, c.country País, DATE(t.timestamp) Fecha, t.amount Importe
-FROM company c
-JOIN transaction t
-ON c.id = t.company_id
-WHERE t.amount BETWEEN 100 AND 200
-AND DATE(t.timestamp) IN ('2021-04-29', '2021-07-20', '2022-03-13')
+SELECT 
+    c.company_name Empresa,
+    c.phone Teléfono,
+    c.country País,
+    DATE(t.timestamp) Fecha,
+    t.amount Importe
+FROM
+    company c
+        JOIN
+    transaction t ON c.id = t.company_id
+WHERE
+    t.amount BETWEEN 100 AND 200
+        AND DATE(t.timestamp) IN ('2021-04-29' , '2021-07-20', '2022-03-13')
 ORDER BY Importe DESC;
+
+-- Ejercicio 2: Obtener un listado con las empresas que tiene más de cuatro o menos de cuatro transacciones
+
+SELECT 
+   c.company_name Empresa,
+--   COUNT(t.id) Transacciones,
+CASE
+	WHEN COUNT(t.id) > 4 THEN 'Más de cuatro transacciones'
+    ELSE 'Menos de cuatro transacciones'
+END AS NumTrans
+FROM
+    transaction t
+JOIN
+    company c ON c.id = t.company_id
+GROUP BY Empresa
+ORDER BY COUNT(t.id) DESC;
