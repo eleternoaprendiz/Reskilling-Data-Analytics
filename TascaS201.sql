@@ -20,15 +20,16 @@ FROM company
 JOIN transaction ON transaction.company_id = company.id
 ORDER BY country;
 
--- Calculamos qué empresa es la que más consume y buscamos su nombre
+-- Calculamos qué empresa tiene una media mayor de ventas y buscamos su nombre
 
 SELECT 
     company.company_name AS 'Compañía líder',
-    SUM(transaction.amount) AS Importe
+    ROUND(AVG(transaction.amount),2) AS Importe
 FROM
     company
         JOIN
     transaction ON transaction.company_id = company.id
+WHERE transaction.declined = 0
 GROUP BY transaction.company_id
 ORDER BY Importe DESC
 LIMIT 1;
@@ -54,14 +55,16 @@ ORDER BY company_name;
 -- Obtener el listado de empresas que no han realizado pedidos
 
 SELECT company_name FROM company
-WHERE id NOT IN
-	(SELECT DISTINCT company_id FROM transaction);
+WHERE NOT EXISTS
+	(SELECT DISTINCT company_id FROM transaction)
+ORDER BY company_name ASC;
     
 -- Nivel 2
 -- Ejercicio 1: Listar los cinco días de mayores ventas y la cantidad total recaudada esos días
 
-select DATE(timestamp) AS Fecha, SUM(amount) AS Total
-from transaction
+SELECT DATE(timestamp) AS Fecha, SUM(amount) AS Total
+FROM transaction
+WHERE declined = 0
 GROUP BY Fecha
 ORDER BY Total DESC
 LIMIT 5;
@@ -74,6 +77,7 @@ FROM
     transaction t
         JOIN
     company c ON c.id = t.company_id
+WHERE t.declined = 0
 GROUP BY País
 ORDER BY Total DESC;
 
@@ -91,6 +95,7 @@ WHERE
     c.country = (SELECT c2.country
         FROM company c2
         WHERE c2.company_name = 'Non Institute')
+        AND c.company_name <>  'Non Institute'
 ORDER BY company_name;
 
 -- b) Solo subqueries
@@ -104,6 +109,7 @@ WHERE
 						FROM company
 						WHERE
                     company_name = 'Non Institute')
+		AND company_name <>  'Non Institute'
 					);
                     
 -- Nivel 3
